@@ -8,12 +8,12 @@
 import Foundation
 
 protocol RecipeOnlineServiceProtocol {
-  func fetchRecipes() async throws -> [Recipe]
+  func getRecipes() async throws -> [Recipe]
 }
 
 final class RecipeOnlineService: RecipeOnlineServiceProtocol {
 
-  func fetchRecipes() async throws -> [Recipe] {
+  func getRecipes() async throws -> [Recipe] {
     // TEST: Fetch json from bundle for now, replace with actual API call later
     guard let url = Bundle.main.url(forResource: "recipes", withExtension: "json") else {
       throw RecipeOnlineServiceError.missingResource

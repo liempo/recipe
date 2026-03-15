@@ -8,8 +8,15 @@
 import Foundation
 
 enum Resource<T> {
-  case none
+  case idle
   case loading
   case success(T)
   case error(Error)
+}
+
+extension Resource {
+  var isLoading: Bool {
+    if case .loading = self { return true }
+    return false
+  }
 }

@@ -9,11 +9,10 @@ import Foundation
 import SwiftData
 
 protocol RecipeOfflineServiceProtocol {
-  func fetchRecipes() async throws -> [Recipe]
-  func replaceAll(with recipes: [Recipe]) async throws
+  func getRecipes() async throws -> [Recipe]
+  func update(from recipes: [Recipe]) async throws
 }
 
-/// SwiftData-backed offline storage. Replaces all stored recipes when updated from online.
 final class RecipeOfflineService: RecipeOfflineServiceProtocol {
   private let container: ModelContainer
 
@@ -21,22 +20,24 @@ final class RecipeOfflineService: RecipeOfflineServiceProtocol {
     self.container = container
   }
 
-  func fetchRecipes() async throws -> [Recipe] {
+  func getRecipes() async throws -> [Recipe] {
     let context = ModelContext(container)
     let descriptor = FetchDescriptor<RecipeEntity>(sortBy: [SortDescriptor(\.title)])
     let entities = try context.fetch(descriptor)
     return entities.map { $0.toRecipe() }
   }
 
-  func replaceAll(with recipes: [Recipe]) async throws {
+  func update(from recipes: [Recipe]) async throws {
     let context = ModelContext(container)
     let descriptor = FetchDescriptor<RecipeEntity>()
     let existing = try context.fetch(descriptor)
-    for entity in existing {
-      context.delete(entity)
-    }
+    let existingById = Dictionary(uniqueKeysWithValues: existing.map { ($0.id, $0) })
     for recipe in recipes {
-      context.insert(RecipeEntity(from: recipe))
+      if let entity = existingById[recipe.id] {
+        entity.update(from: recipe)
+      } else {
+        context.insert(RecipeEntity(from: recipe))
+      }
     }
     try context.save()
   }

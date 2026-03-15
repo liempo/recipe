@@ -1,18 +1,142 @@
 [
   {
+    "id": 1,
+    "title": "Pizza",
+    "description": "Classic pizza with tomato sauce, cheese, and your choice of toppings. The image shows a Hawaiian-style pizza.",
+    "servings": 4,
+    "ingredients": ["Pizza dough", "Tomato sauce", "Mozzarella", "Ham", "Pineapple", "Olive oil"],
+    "instructions": ["Roll out dough", "Spread sauce", "Add cheese and toppings", "Bake at 220°C until golden"],
+    "tags": ["italian", "main"],
+    "image": "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=781&auto=format&fit=crop"
+  },
+  {
+    "id": 2,
     "title": "Pasta Carbonara",
-    "description": "Classic Roman pasta with eggs, cheese, and guanciale.",
+    "description": "Classic Roman pasta with eggs, pecorino, and guanciale.",
     "servings": 4,
     "ingredients": ["Spaghetti", "Guanciale", "Eggs", "Pecorino Romano", "Black pepper"],
     "instructions": ["Boil pasta", "Fry guanciale", "Mix eggs and cheese", "Toss pasta with guanciale", "Add egg mixture off heat"],
-    "tags": ["vegetarian", "italian"]
+    "tags": ["italian", "vegetarian"],
+    "image": "https://images.unsplash.com/photo-1612874742237-6526221588e3?w=781"
   },
   {
-    "title": "Vegetable Stir Fry",
-    "description": "Quick stir-fried vegetables with soy sauce.",
+    "id": 3,
+    "title": "Caesar Salad",
+    "description": "Crisp romaine with Caesar dressing, parmesan, and croutons.",
     "servings": 2,
-    "ingredients": ["Broccoli", "Bell peppers", "Soy sauce", "Garlic", "Ginger"],
-    "instructions": ["Heat wok", "Stir-fry garlic and ginger", "Add vegetables", "Add soy sauce"],
-    "tags": ["vegetarian", "vegan"]
+    "ingredients": ["Romaine lettuce", "Parmesan", "Croutons", "Caesar dressing", "Lemon"],
+    "instructions": ["Wash and chop lettuce", "Toss with dressing", "Top with parmesan and croutons"],
+    "tags": ["salad", "vegetarian"],
+    "image": "https://images.unsplash.com/photo-1546793665-c74683f339c1?w=781"
+  },
+  {
+    "id": 4,
+    "title": "Beef Tacos",
+    "description": "Seasoned ground beef in soft or crispy tortillas with fresh toppings.",
+    "servings": 4,
+    "ingredients": ["Ground beef", "Taco seasoning", "Tortillas", "Lettuce", "Tomato", "Cheese", "Sour cream", "Lime"],
+    "instructions": ["Brown beef and add seasoning", "Warm tortillas", "Assemble with toppings", "Serve with lime wedges"],
+    "tags": ["mexican", "main"],
+    "image": "https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=781"
+  },
+  {
+    "id": 5,
+    "title": "Chicken Curry",
+    "description": "Tender chicken in a spiced coconut or tomato-based curry sauce.",
+    "servings": 4,
+    "ingredients": ["Chicken thighs", "Curry paste", "Coconut milk", "Onion", "Garlic", "Ginger", "Rice"],
+    "instructions": ["Sauté onion, garlic, ginger", "Add curry paste", "Add chicken and coconut milk", "Simmer until cooked", "Serve over rice"],
+    "tags": ["indian", "main"],
+    "image": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=781"
+  },
+  {
+    "id": 6,
+    "title": "Greek Salad",
+    "description": "Fresh cucumbers, tomatoes, olives, and feta with olive oil and oregano.",
+    "servings": 4,
+    "ingredients": ["Cucumber", "Tomatoes", "Red onion", "Kalamata olives", "Feta cheese", "Olive oil", "Oregano"],
+    "instructions": ["Chop vegetables", "Add olives and cubed feta", "Dress with oil and oregano", "Season and serve"],
+    "tags": ["salad", "vegetarian", "mediterranean"],
+    "image": "https://images.unsplash.com/photo-1540189549336-e6e97c886e63?w=781"
+  },
+  {
+    "id": 7,
+    "title": "French Toast",
+    "description": "Slices of bread dipped in egg and milk, pan-fried until golden.",
+    "servings": 2,
+    "ingredients": ["Bread", "Eggs", "Milk", "Cinnamon", "Vanilla", "Butter", "Maple syrup"],
+    "instructions": ["Whisk eggs, milk, cinnamon, vanilla", "Dip bread slices", "Fry in butter until golden", "Serve with syrup"],
+    "tags": ["breakfast", "vegetarian"],
+    "image": "https://images.unsplash.com/photo-1484723091739-30a097e8f929?w=781"
+  },
+  {
+    "id": 8,
+    "title": "Guacamole",
+    "description": "Creamy mashed avocado with lime, cilantro, and a touch of heat.",
+    "servings": 4,
+    "ingredients": ["Avocados", "Lime", "Cilantro", "Red onion", "Tomato", "Jalapeño", "Salt"],
+    "instructions": ["Mash avocados", "Stir in lime juice", "Add diced onion, tomato, jalapeño", "Fold in cilantro and salt"],
+    "tags": ["mexican", "vegan", "dip"],
+    "image": "https://images.unsplash.com/photo-1534939563226-f3d33db32020?w=781"
+  },
+  {
+    "id": 9,
+    "title": "Tom Yum Soup",
+    "description": "Spicy and sour Thai soup with shrimp, lemongrass, and galangal.",
+    "servings": 2,
+    "ingredients": ["Shrimp", "Lemongrass", "Galangal", "Kaffir lime leaves", "Mushrooms", "Tomatoes", "Fish sauce", "Lime"],
+    "instructions": ["Simmer lemongrass and galangal in broth", "Add mushrooms and tomatoes", "Add shrimp", "Season with fish sauce and lime"],
+    "tags": ["thai", "soup", "spicy"],
+    "image": "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=781"
+  },
+  {
+    "id": 10,
+    "title": "Hummus",
+    "description": "Smooth chickpea dip with tahini, lemon, and garlic.",
+    "servings": 6,
+    "ingredients": ["Chickpeas", "Tahini", "Lemon juice", "Garlic", "Olive oil", "Cumin", "Salt"],
+    "instructions": ["Blend chickpeas with tahini, lemon, garlic", "Add water until smooth", "Drizzle with olive oil", "Dust with cumin"],
+    "tags": ["mediterranean", "vegan", "dip"],
+    "image": "https://images.unsplash.com/photo-1633979484658-18e53b2b14e6?w=781"
+  },
+  {
+    "id": 11,
+    "title": "Grilled Salmon",
+    "description": "Salmon fillets with a simple herb and lemon marinade, grilled or pan-seared.",
+    "servings": 2,
+    "ingredients": ["Salmon fillets", "Lemon", "Dill", "Olive oil", "Garlic", "Salt", "Pepper"],
+    "instructions": ["Marinate salmon in oil, lemon, dill, garlic", "Grill or pan-sear 4–5 min per side", "Rest and serve with lemon"],
+    "tags": ["seafood", "main", "healthy"],
+    "image": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=781"
+  },
+  {
+    "id": 12,
+    "title": "Chocolate Brownies",
+    "description": "Dense, fudgy chocolate brownies with a crackly top.",
+    "servings": 12,
+    "ingredients": ["Butter", "Dark chocolate", "Sugar", "Eggs", "Flour", "Cocoa powder", "Vanilla", "Salt"],
+    "instructions": ["Melt butter and chocolate", "Whisk in sugar and eggs", "Fold in flour and cocoa", "Bake at 180°C until set"],
+    "tags": ["dessert", "vegetarian"],
+    "image": "https://images.unsplash.com/photo-1564355808539-22fda35bed7e?w=781"
+  },
+  {
+    "id": 13,
+    "title": "Vegetable Stir Fry",
+    "description": "Quick stir-fried vegetables with soy sauce and optional tofu.",
+    "servings": 2,
+    "ingredients": ["Broccoli", "Bell peppers", "Snap peas", "Soy sauce", "Garlic", "Ginger", "Sesame oil"],
+    "instructions": ["Heat wok with oil", "Stir-fry garlic and ginger", "Add vegetables", "Toss with soy sauce"],
+    "tags": ["asian", "vegetarian", "vegan"],
+    "image": "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=781"
+  },
+  {
+    "id": 14,
+    "title": "Margherita Pizza",
+    "description": "Simple pizza with tomato, mozzarella, and fresh basil.",
+    "servings": 2,
+    "ingredients": ["Pizza dough", "Tomato sauce", "Fresh mozzarella", "Basil", "Olive oil", "Salt"],
+    "instructions": ["Roll out dough", "Spread sauce", "Add torn mozzarella", "Bake until bubbly", "Top with basil and oil"],
+    "tags": ["italian", "vegetarian", "main"],
+    "image": "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=781"
   }
 ]

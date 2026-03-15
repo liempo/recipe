@@ -8,14 +8,14 @@
 import Foundation
 import SwiftData
 
-/// SwiftData-backed entity for offline persistence of recipes.
 @Model
 final class RecipeEntity {
+  var id: Int
   var title: String
-  var recipeDescription: String // `description` is reserved in Model
+  var recipeDescription: String
   var servings: Int
+  var image: String?
 
-  // SwiftData doesn't persist [String] directly; store as JSON in Data.
   var ingredientsData: Data?
   var instructionsData: Data?
   var tagsData: Data?
@@ -36,43 +36,62 @@ final class RecipeEntity {
   }
 
   init(
+    id: Int = -1,
     title: String = "",
     description: String = "",
     servings: Int = 0,
     ingredients: [String] = [],
     instructions: [String] = [],
-    tags: [String] = []
+    tags: [String] = [],
+    image: String? = nil
   ) {
+    self.id = id
     self.title = title
     self.recipeDescription = description
     self.servings = servings
+    self.image = image
     self.ingredientsData = Self.encodeStringArray(ingredients)
     self.instructionsData = Self.encodeStringArray(instructions)
     self.tagsData = Self.encodeStringArray(tags)
   }
 
-  /// Create from a Codable `Recipe` (e.g. from API or import).
   convenience init(from recipe: Recipe) {
     self.init(
+      id: recipe.id,
       title: recipe.title,
       description: recipe.description,
       servings: recipe.servings,
       ingredients: recipe.ingredients,
       instructions: recipe.instructions,
-      tags: recipe.tags
+      tags: recipe.tags,
+      image: recipe.image
     )
   }
 
-  /// Convert to Codable `Recipe` for export or API.
   func toRecipe() -> Recipe {
     Recipe(
+      id: id,
       title: title,
       description: recipeDescription,
       servings: servings,
       ingredients: ingredients,
       instructions: instructions,
-      tags: tags
+      tags: tags,
+      image: image
     )
+  }
+
+  func update(from recipe: Recipe) {
+    guard id == recipe.id else {
+      fatalError("RecipeEntity.update(from:) called with mismatched id: \(id) != \(recipe.id)") 
+    }
+    title = recipe.title
+    recipeDescription = recipe.description
+    servings = recipe.servings
+    image = recipe.image
+    ingredients = recipe.ingredients
+    instructions = recipe.instructions
+    tags = recipe.tags
   }
 
   private static func encodeStringArray(_ array: [String]) -> Data? {

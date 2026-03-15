@@ -9,7 +9,7 @@ import Foundation
 import SwiftData
 
 protocol RecipeRepositoryProtocol {
-  func fetchRecipes() async throws -> [Recipe]
+  func getRecipes() async throws -> [Recipe]
 }
 
 final class RecipeRepository: RecipeRepositoryProtocol {
@@ -18,7 +18,14 @@ final class RecipeRepository: RecipeRepositoryProtocol {
 
   private static var _shared: RecipeRepository?
 
-  /// The shared repository. Must call `configure(container:)` before first use (e.g. in your App's scene).
+  static func configure(container: ModelContainer) {
+    guard _shared == nil else { return }
+    _shared = RecipeRepository(
+      online: RecipeOnlineService(),
+      offline: RecipeOfflineService(container: container)
+    )
+  }
+
   static var shared: RecipeRepository {
     guard let s = _shared else {
       fatalError(
@@ -28,27 +35,14 @@ final class RecipeRepository: RecipeRepositoryProtocol {
     return s
   }
 
-  /// Configures the singleton with the app's model container. Call once at app startup (AppDelegeate)
-  static func configure(container: ModelContainer) {
-    guard _shared == nil else { return }
-    _shared = RecipeRepository(
-      online: RecipeOnlineService(),
-      offline: RecipeOfflineService(container: container)
-    )
-  }
-
   init(online: RecipeOnlineServiceProtocol, offline: RecipeOfflineServiceProtocol) {
     self.online = online
     self.offline = offline
   }
 
-  func fetchRecipes() async throws -> [Recipe] {
-    do {
-      let recipes = try await online.fetchRecipes()
-      try await offline.replaceAll(with: recipes)
-      return recipes
-    } catch {
-      return try await offline.fetchRecipes()
-    }
+  func getRecipes() async throws -> [Recipe] {
+    let list = try await online.getRecipes()
+    try await offline.update(from: list)
+    return list
   }
 }
