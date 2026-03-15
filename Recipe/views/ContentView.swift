@@ -10,6 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
   @StateObject private var recipeListViewModel = RecipeListViewModel()
+  @StateObject private var searchViewModel = RecipeSearchViewModel()
   @StateObject private var favoritesViewModel = RecipeFavoritesViewModel()
 
   @State private var selectedTab: Tab = .browse
@@ -46,6 +47,7 @@ struct ContentView: View {
         .tag(Tab.favorites)
     }
     .environmentObject(recipeListViewModel)
+    .environmentObject(searchViewModel)
     .environmentObject(favoritesViewModel)
     .onAppear {
       Task { await recipeListViewModel.getRecipes() }

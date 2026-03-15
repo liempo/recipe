@@ -10,6 +10,7 @@ import SwiftData
 
 protocol RecipeRepositoryProtocol {
   func getRecipes() async throws -> [Recipe]
+  func searchRecipes(criteria: RecipeSearchCriteria) async throws -> [Recipe]
 }
 
 final class RecipeRepository: RecipeRepositoryProtocol {
@@ -44,5 +45,9 @@ final class RecipeRepository: RecipeRepositoryProtocol {
     let list = try await online.getRecipes()
     try await offline.update(from: list)
     return list
+  }
+
+  func searchRecipes(criteria: RecipeSearchCriteria) async throws -> [Recipe] {
+    try await online.searchRecipes(criteria: criteria)
   }
 }

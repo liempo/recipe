@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchScreenView: View {
-  @EnvironmentObject private var listViewModel: RecipeListViewModel
+  @EnvironmentObject private var searchViewModel: RecipeSearchViewModel
   @EnvironmentObject private var favoritesViewModel: RecipeFavoritesViewModel
   @FocusState private var searchFocused: Bool
 
@@ -18,70 +18,25 @@ struct SearchScreenView: View {
   @State private var excludeIngredients: [String] = []
   @State private var attributes: [String] = []
 
-  private static let attributeSuggestions = ["vegan", "halal"]
+  private static let attributeSuggestions = ["vegetarian", "halal"]
 
-  private var searchResults: [Recipe] {
-    guard case .success(let list) = listViewModel.recipes else { return [] }
-    let query = searchInstructionsText.trimmingCharacters(in: .whitespaces)
-    let include = includeIngredients.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-    let exclude = excludeIngredients.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-    let attrs = attributes.map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty }
-    let hasServingsFilter = (searchServings ?? 0) > 0
-    let hasAnyFilter = !query.isEmpty || hasServingsFilter || !include.isEmpty || !exclude.isEmpty || !attrs.isEmpty
-    if !hasAnyFilter {
-      return []
-    }
-    var result = list
-    if hasServingsFilter, let servings = searchServings, servings > 0 {
-      result = result.filter { $0.servings == servings }
-    }
-    if !include.isEmpty {
-      result = result.filter { recipe in
-        include.allSatisfy { ing in
-          recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ing) }
-        }
-      }
-    }
-    if !exclude.isEmpty {
-      result = result.filter { recipe in
-        !exclude.contains { ex in
-          recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ex) }
-        }
-      }
-    }
-    if !attrs.isEmpty {
-      result = result.filter { recipe in
-        attrs.allSatisfy { attr in
-          recipe.tags.contains { $0.lowercased() == attr }
-        }
-      }
-    }
-    if !query.isEmpty {
-      result = result.filter { recipe in
-        recipe.title.localizedCaseInsensitiveContains(query)
-          || recipe.description.localizedCaseInsensitiveContains(query)
-          || recipe.instructions.contains { $0.localizedCaseInsensitiveContains(query) }
-      }
-    }
-    return result
+  private var currentCriteria: RecipeSearchCriteria {
+    RecipeSearchCriteria(
+      instructionQuery: searchInstructionsText,
+      servings: searchServings,
+      includeIngredients: includeIngredients,
+      excludeIngredients: excludeIngredients,
+      attributes: attributes
+    )
   }
 
   var body: some View {
-    Group {
-      switch listViewModel.recipes {
-      case .idle, .loading:
-        ProgressView("Loading recipes…")
-          .frame(maxWidth: .infinity, maxHeight: .infinity)
-      case .success:
-        searchContent
-      case .error(let error):
-        ContentUnavailableView(
-          "Error", systemImage: "exclamationmark.triangle",
-          description: Text(error.localizedDescription))
+    searchContent
+      .navigationTitle("Search")
+      .navigationBarTitleDisplayMode(.inline)
+      .task(id: currentCriteria) {
+        await searchViewModel.search(criteria: currentCriteria)
       }
-    }
-    .navigationTitle("Search")
-    .navigationBarTitleDisplayMode(.inline)
   }
 
   private var searchContent: some View {
@@ -142,31 +97,55 @@ struct SearchScreenView: View {
         }
       }
 
-      Section("Results") {
-        if searchResults.isEmpty {
-          Text("No recipes match the current filters.")
-            .foregroundStyle(.secondary)
-        } else {
-          ForEach(searchResults, id: \.id) { recipe in
-            NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
-              RecipeSearchResultItemView(recipe: recipe)
-            }
-          }
-        }
+      Section(resultsSectionHeader) {
+        resultsContent
       }
     }
     .listStyle(.insetGrouped)
     .refreshable {
-      await listViewModel.getRecipes()
+      await searchViewModel.search(criteria: currentCriteria)
+    }
+  }
+
+  private var resultsSectionHeader: String {
+    switch searchViewModel.searchResults {
+    case .success(let list) where !list.isEmpty:
+      return "Results (\(list.count))"
+    default:
+      return "Results"
+    }
+  }
+
+  @ViewBuilder
+  private var resultsContent: some View {
+    switch searchViewModel.searchResults {
+    case .idle:
+      Text(currentCriteria.hasAnyFilter ? "No recipes match the current filters." : "Enter search terms or set filters above.")
+        .foregroundStyle(.secondary)
+    case .success(let list) where list.isEmpty:
+      Text(currentCriteria.hasAnyFilter ? "No recipes match the current filters." : "Enter search terms or set filters above.")
+        .foregroundStyle(.secondary)
+    case .loading:
+      ProgressView("Searching…")
+        .frame(maxWidth: .infinity)
+    case .success(let list):
+      ForEach(list, id: \.id) { recipe in
+        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+          RecipeSearchResultItemView(recipe: recipe)
+        }
+      }
+    case .error(let error):
+      ContentUnavailableView(
+        "Search failed",
+        systemImage: "exclamationmark.triangle",
+        description: Text(error.localizedDescription)
+      )
     }
   }
 }
 
 #Preview {
-  let listViewModel = RecipeListViewModel()
-  let favoritesViewModel = RecipeFavoritesViewModel()
-  listViewModel.recipes = .success(Recipe.previews)
-  return SearchScreenView()
-    .environmentObject(listViewModel)
-    .environmentObject(favoritesViewModel)
+  SearchScreenView()
+    .environmentObject(RecipeSearchViewModel())
+    .environmentObject(RecipeFavoritesViewModel())
 }
