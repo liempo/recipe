@@ -56,3 +56,11 @@ struct RecipeDetailView: View {
       .padding(.top, 8)
   }
 }
+
+#Preview {
+  let recipe = Recipe.previews.first ?? Recipe(title: "Sample Recipe", description: "A tasty dish.", servings: 4, ingredients: ["Flour", "Eggs"], instructions: ["Mix", "Bake"])
+  return NavigationStack {
+    RecipeDetailView(recipe: recipe)
+      .environmentObject(RecipeFavoritesViewModel())
+  }
+}

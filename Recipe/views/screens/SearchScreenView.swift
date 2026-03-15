@@ -111,8 +111,11 @@ struct SearchScreenView: View {
           } else {
             ForEach(searchResults, id: \.id) { recipe in
               NavigationLink(value: recipe) {
-                RecipeRowView(recipe: recipe)
+                RecipeCardView(recipe: recipe)
               }
+              .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+              .listRowSeparator(.hidden)
+              .listRowBackground(Color.clear)
               .swipeActions(edge: .trailing) {
                 Button {
                   favoritesViewModel.toggleFavorite(recipe)

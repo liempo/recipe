@@ -25,3 +25,12 @@ struct FilterChip: View {
     .buttonStyle(.plain)
   }
 }
+
+#Preview {
+  HStack(spacing: 12) {
+    FilterChip(title: "All", isSelected: true) {}
+    FilterChip(title: "vegan", isSelected: false) {}
+    FilterChip(title: "breakfast", isSelected: false) {}
+  }
+  .padding()
+}

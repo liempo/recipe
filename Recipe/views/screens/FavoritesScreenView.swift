@@ -19,7 +19,11 @@ struct FavoritesScreenView: View {
   var body: some View {
     NavigationStack {
       Group {
-        if case .success = listViewModel.recipes {
+        switch listViewModel.recipes {
+        case .idle, .loading:
+          ProgressView("Loading…")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        case .success:
           if favoriteRecipes.isEmpty {
             ContentUnavailableView(
               "No Favorites",
@@ -27,26 +31,9 @@ struct FavoritesScreenView: View {
               description: Text("Tap the heart on a recipe in Browse to add it here.")
             )
           } else {
-            List {
-              ForEach(favoriteRecipes, id: \.id) { recipe in
-                NavigationLink(value: recipe) {
-                  RecipeRowView(recipe: recipe)
-                }
-                .swipeActions(edge: .trailing) {
-                  Button(role: .destructive) {
-                    favoritesViewModel.toggleFavorite(recipe)
-                  } label: {
-                    Label("Remove", systemImage: "heart.slash")
-                  }
-                }
-              }
-            }
-            .listStyle(.plain)
+            favoritesContent
           }
-        } else if case .loading = listViewModel.recipes {
-          ProgressView("Loading…")
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
+        case .error:
           ContentUnavailableView(
             "Load recipes",
             systemImage: "arrow.clockwise",
@@ -60,24 +47,36 @@ struct FavoritesScreenView: View {
       }
     }
   }
+
+  private var favoritesContent: some View {
+    ScrollView {
+      VStack(spacing: 12) {
+        ForEach(favoriteRecipes, id: \.id) { recipe in
+          NavigationLink(value: recipe) {
+            RecipeCardView(recipe: recipe)
+              .contentShape(Rectangle())
+          }
+          .buttonStyle(.plain)
+        }
+      }
+      .padding(.horizontal, 16)
+      .padding(.top, 8)
+      .padding(.bottom, 24)
+    }
+    .scrollIndicators(.hidden)
+    .refreshable {
+      await listViewModel.getRecipes()
+    }
+  }
 }
 
-#Preview("With favorites") {
+#Preview {
   let listViewModel = RecipeListViewModel()
   let favoritesViewModel = RecipeFavoritesViewModel()
   listViewModel.recipes = .success(Recipe.previews)
   if let first = Recipe.previews.first {
     favoritesViewModel.favoriteIds = [first.id]
   }
-  return FavoritesScreenView()
-    .environmentObject(listViewModel)
-    .environmentObject(favoritesViewModel)
-}
-
-#Preview("Empty") {
-  let listViewModel = RecipeListViewModel()
-  let favoritesViewModel = RecipeFavoritesViewModel()
-  listViewModel.recipes = .success(Recipe.previews)
   return FavoritesScreenView()
     .environmentObject(listViewModel)
     .environmentObject(favoritesViewModel)

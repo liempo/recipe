@@ -12,6 +12,8 @@ struct BrowseScreenView: View {
   @EnvironmentObject private var favoritesViewModel: RecipeFavoritesViewModel
   @State private var selectedBrowseTag: String?
 
+  private let tagRowHeight: CGFloat = 44
+
   var body: some View {
     NavigationStack {
       Group {
@@ -28,14 +30,6 @@ struct BrowseScreenView: View {
         }
       }
       .navigationTitle("Browse")
-      .toolbar {
-        ToolbarItem(placement: .primaryAction) {
-          Button("Refresh") {
-            Task { await listViewModel.getRecipes() }
-          }
-          .disabled(listViewModel.recipes.isLoading)
-        }
-      }
       .navigationDestination(for: Recipe.self) { recipe in
         RecipeDetailView(recipe: recipe)
       }
@@ -43,9 +37,27 @@ struct BrowseScreenView: View {
   }
 
   private var browseContent: some View {
-    VStack(spacing: 0) {
-      tagFilter
-      recipeList
+    ScrollView {
+      VStack(spacing: 0) {
+        tagFilterRow
+
+        VStack(spacing: 12) {
+          ForEach(browseRecipes, id: \.id) { recipe in
+            NavigationLink(value: recipe) {
+              RecipeCardView(recipe: recipe)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+          }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
+      }
+    }
+    .scrollIndicators(.hidden)
+    .refreshable {
+      await listViewModel.getRecipes()
     }
   }
 
@@ -60,7 +72,7 @@ struct BrowseScreenView: View {
     return list.filter { $0.tags.contains(tag) }
   }
 
-  private var tagFilter: some View {
+  private var tagFilterRow: some View {
     ScrollView(.horizontal, showsIndicators: false) {
       HStack(spacing: 8) {
         FilterChip(
@@ -78,32 +90,11 @@ struct BrowseScreenView: View {
           }
         }
       }
-      .padding(.horizontal)
+      .padding(.horizontal, 16)
       .padding(.vertical, 8)
     }
-    .background(.bar)
-  }
-
-  private var recipeList: some View {
-    List {
-      ForEach(browseRecipes, id: \.id) { recipe in
-        NavigationLink(value: recipe) {
-          RecipeRowView(recipe: recipe)
-        }
-        .swipeActions(edge: .trailing) {
-          Button {
-            favoritesViewModel.toggleFavorite(recipe)
-          } label: {
-            Label(
-              favoritesViewModel.isFavorite(recipe) ? "Unfavorite" : "Favorite",
-              systemImage: favoritesViewModel.isFavorite(recipe) ? "heart.slash" : "heart"
-            )
-          }
-          .tint(.red)
-        }
-      }
-    }
-    .listStyle(.plain)
+    .frame(height: tagRowHeight)
+    .background(Color.clear)
   }
 }
 
