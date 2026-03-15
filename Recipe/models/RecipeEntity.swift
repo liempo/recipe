@@ -20,9 +20,9 @@ final class RecipeEntity {
   var instructionsData: Data?
   var tagsData: Data?
 
-  var ingredients: [String] {
-    get { Self.decodeStringArray(from: ingredientsData) }
-    set { ingredientsData = Self.encodeStringArray(newValue) }
+  var ingredients: [Ingredient] {
+    get { Self.decodeIngredientArray(from: ingredientsData) }
+    set { ingredientsData = Self.encodeIngredientArray(newValue) }
   }
 
   var instructions: [String] {
@@ -40,7 +40,7 @@ final class RecipeEntity {
     title: String = "",
     description: String = "",
     servings: Int = 0,
-    ingredients: [String] = [],
+    ingredients: [Ingredient] = [],
     instructions: [String] = [],
     tags: [String] = [],
     image: String? = nil
@@ -50,7 +50,7 @@ final class RecipeEntity {
     self.recipeDescription = description
     self.servings = servings
     self.image = image
-    self.ingredientsData = Self.encodeStringArray(ingredients)
+    self.ingredientsData = Self.encodeIngredientArray(ingredients)
     self.instructionsData = Self.encodeStringArray(instructions)
     self.tagsData = Self.encodeStringArray(tags)
   }
@@ -83,7 +83,7 @@ final class RecipeEntity {
 
   func update(from recipe: Recipe) {
     guard id == recipe.id else {
-      fatalError("RecipeEntity.update(from:) called with mismatched id: \(id) != \(recipe.id)") 
+      fatalError("RecipeEntity.update(from:) called with mismatched id: \(id) != \(recipe.id)")
     }
     title = recipe.title
     recipeDescription = recipe.description
@@ -92,6 +92,15 @@ final class RecipeEntity {
     ingredients = recipe.ingredients
     instructions = recipe.instructions
     tags = recipe.tags
+  }
+
+  private static func encodeIngredientArray(_ array: [Ingredient]) -> Data? {
+    try? JSONEncoder().encode(array)
+  }
+
+  private static func decodeIngredientArray(from data: Data?) -> [Ingredient] {
+    guard let data else { return [] }
+    return (try? JSONDecoder().decode([Ingredient].self, from: data)) ?? []
   }
 
   private static func encodeStringArray(_ array: [String]) -> Data? {

@@ -34,7 +34,7 @@ struct SearchScreenView: View {
     if !include.isEmpty {
       result = result.filter { recipe in
         include.allSatisfy { ing in
-          recipe.ingredients.contains { $0.localizedCaseInsensitiveContains(ing) }
+          recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ing) }
         }
       }
     }
@@ -45,7 +45,7 @@ struct SearchScreenView: View {
     if !exclude.isEmpty {
       result = result.filter { recipe in
         !exclude.contains { ex in
-          recipe.ingredients.contains { $0.localizedCaseInsensitiveContains(ex) }
+          recipe.ingredients.contains { $0.name.localizedCaseInsensitiveContains(ex) }
         }
       }
     }

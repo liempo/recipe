@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BrowseScreenView: View {
+  @Environment(\.horizontalSizeClass) private var horizontalSizeClass
   @EnvironmentObject private var listViewModel: RecipeListViewModel
   @EnvironmentObject private var favoritesViewModel: RecipeFavoritesViewModel
   @State private var selectedBrowseTag: String?
@@ -41,13 +42,27 @@ struct BrowseScreenView: View {
       VStack(spacing: 0) {
         tagFilterRow
 
-        VStack(spacing: 12) {
-          ForEach(browseRecipes, id: \.id) { recipe in
-            NavigationLink(value: recipe) {
-              RecipeCardView(recipe: recipe)
-                .contentShape(Rectangle())
+        Group {
+          if horizontalSizeClass == .regular {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+              ForEach(browseRecipes, id: \.id) { recipe in
+                NavigationLink(value: recipe) {
+                  RecipeCardView(recipe: recipe)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+              }
             }
-            .buttonStyle(.plain)
+          } else {
+            VStack(spacing: 12) {
+              ForEach(browseRecipes, id: \.id) { recipe in
+                NavigationLink(value: recipe) {
+                  RecipeCardView(recipe: recipe)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+              }
+            }
           }
         }
         .padding(.horizontal, 16)

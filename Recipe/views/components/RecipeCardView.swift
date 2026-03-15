@@ -121,12 +121,12 @@ struct RecipeCardView: View {
 
 #Preview {
   let recipe = Recipe.previews.first ??
-    Recipe(id: 1, title: "Sample Recipe", servings: 4, ingredients: ["A", "B"])
+    Recipe(id: 1, title: "Sample Recipe", servings: 4, ingredients: [Ingredient(name: "A", quantity: 1, unit: ""), Ingredient(name: "B", quantity: 1, unit: "")])
   return VStack {
     RecipeCardView(recipe: recipe)
       .environmentObject(RecipeFavoritesViewModel())
       .padding()
-    RecipeCardView(recipe: Recipe(id: 1, title: "Sample Recipe", servings: 4, ingredients: ["A", "B"]))
+    RecipeCardView(recipe: Recipe(id: 1, title: "Sample Recipe", servings: 4, ingredients: [Ingredient(name: "A", quantity: 1, unit: ""), Ingredient(name: "B", quantity: 1, unit: "")]))
       .environmentObject(RecipeFavoritesViewModel())
       .padding()
   }
