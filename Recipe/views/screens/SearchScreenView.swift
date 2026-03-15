@@ -14,23 +14,27 @@ struct SearchScreenView: View {
 
   @State private var searchInstructionsText: String = ""
   @State private var searchServings: Int?
-  @State private var searchVeganOnly: Bool = false
-  @State private var includeIngredientsText: String = ""
-  @State private var excludeIngredientsText: String = ""
+  @State private var includeIngredients: [String] = []
+  @State private var excludeIngredients: [String] = []
+  @State private var attributes: [String] = []
+
+  private static let attributeSuggestions = ["vegan", "halal"]
 
   private var searchResults: [Recipe] {
     guard case .success(let list) = listViewModel.recipes else { return [] }
-    var result = list
-    if searchVeganOnly {
-      result = result.filter { $0.tags.contains("vegan") }
+    let query = searchInstructionsText.trimmingCharacters(in: .whitespaces)
+    let include = includeIngredients.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    let exclude = excludeIngredients.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    let attrs = attributes.map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty }
+    let hasServingsFilter = (searchServings ?? 0) > 0
+    let hasAnyFilter = !query.isEmpty || hasServingsFilter || !include.isEmpty || !exclude.isEmpty || !attrs.isEmpty
+    if !hasAnyFilter {
+      return []
     }
-    if let servings = searchServings, servings > 0 {
+    var result = list
+    if hasServingsFilter, let servings = searchServings, servings > 0 {
       result = result.filter { $0.servings == servings }
     }
-    let include = includeIngredientsText
-      .split(separator: ",")
-      .map { $0.trimmingCharacters(in: .whitespaces) }
-      .filter { !$0.isEmpty }
     if !include.isEmpty {
       result = result.filter { recipe in
         include.allSatisfy { ing in
@@ -38,10 +42,6 @@ struct SearchScreenView: View {
         }
       }
     }
-    let exclude = excludeIngredientsText
-      .split(separator: ",")
-      .map { $0.trimmingCharacters(in: .whitespaces) }
-      .filter { !$0.isEmpty }
     if !exclude.isEmpty {
       result = result.filter { recipe in
         !exclude.contains { ex in
@@ -49,92 +49,115 @@ struct SearchScreenView: View {
         }
       }
     }
-    let query = searchInstructionsText.trimmingCharacters(in: .whitespaces)
+    if !attrs.isEmpty {
+      result = result.filter { recipe in
+        attrs.allSatisfy { attr in
+          recipe.tags.contains { $0.lowercased() == attr }
+        }
+      }
+    }
     if !query.isEmpty {
       result = result.filter { recipe in
-        recipe.instructions.contains { $0.localizedCaseInsensitiveContains(query) }
+        recipe.title.localizedCaseInsensitiveContains(query)
+          || recipe.description.localizedCaseInsensitiveContains(query)
+          || recipe.instructions.contains { $0.localizedCaseInsensitiveContains(query) }
       }
     }
     return result
   }
 
   var body: some View {
-    NavigationStack {
-      List {
-        Section("Search in instructions") {
-          TextField("e.g. boil, bake, fry", text: $searchInstructionsText)
-            .textContentType(.none)
-            .autocorrectionDisabled()
-            .focused($searchFocused)
-        }
+    Group {
+      switch listViewModel.recipes {
+      case .idle, .loading:
+        ProgressView("Loading recipes…")
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      case .success:
+        searchContent
+      case .error(let error):
+        ContentUnavailableView(
+          "Error", systemImage: "exclamationmark.triangle",
+          description: Text(error.localizedDescription))
+      }
+    }
+    .navigationTitle("Search")
+    .navigationBarTitleDisplayMode(.inline)
+  }
 
-        Section("Filters") {
-          HStack {
-            Text("Servings")
-            Spacer()
-            Picker("Servings", selection: Binding(
-              get: { searchServings ?? 0 },
-              set: { searchServings = $0 == 0 ? nil : $0 }
-            )) {
-              Text("Any").tag(0)
-              ForEach([1, 2, 4, 6, 8, 10], id: \.self) { n in
-                Text("\(n)").tag(n)
-              }
+  private var searchContent: some View {
+    List {
+      Section {
+        TextField("e.g. chicken curry, bake", text: $searchInstructionsText)
+          .textContentType(.none)
+          .autocorrectionDisabled()
+          .focused($searchFocused)
+      } header: {
+        Text("Search")
+      } footer: {
+        Text("Also searches instructions.")
+          .font(.footnote)
+          .foregroundStyle(.secondary)
+      }
+
+      Section("Filters") {
+        HStack {
+          Text("Servings")
+          Spacer()
+          Picker("Servings", selection: Binding(
+            get: { searchServings ?? 0 },
+            set: { searchServings = $0 == 0 ? nil : $0 }
+          )) {
+            Text("Any").tag(0)
+            ForEach([1, 2, 4, 6, 8, 10], id: \.self) { n in
+              Text("\(n)").tag(n)
             }
-            .pickerStyle(.menu)
-            .labelsHidden()
           }
-
-          Toggle("Vegan only", isOn: $searchVeganOnly)
-
-          VStack(alignment: .leading, spacing: 4) {
-            Text("Include ingredients (comma-separated)")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-            TextField("e.g. chicken, garlic", text: $includeIngredientsText)
-              .textContentType(.none)
-          }
-
-          VStack(alignment: .leading, spacing: 4) {
-            Text("Exclude ingredients (comma-separated)")
-              .font(.caption)
-              .foregroundStyle(.secondary)
-            TextField("e.g. nuts, dairy", text: $excludeIngredientsText)
-              .textContentType(.none)
-          }
+          .pickerStyle(.menu)
+          .labelsHidden()
         }
 
-        Section("Results") {
-          if searchResults.isEmpty {
-            Text("No recipes match the current filters.")
-              .foregroundStyle(.secondary)
-          } else {
-            ForEach(searchResults, id: \.id) { recipe in
-              NavigationLink(value: recipe) {
-                RecipeCardView(recipe: recipe)
-              }
-              .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-              .listRowSeparator(.hidden)
-              .listRowBackground(Color.clear)
-              .swipeActions(edge: .trailing) {
-                Button {
-                  favoritesViewModel.toggleFavorite(recipe)
-                } label: {
-                  Label(
-                    favoritesViewModel.isFavorite(recipe) ? "Unfavorite" : "Favorite",
-                    systemImage: favoritesViewModel.isFavorite(recipe) ? "heart.slash" : "heart"
-                  )
-                }
-                .tint(.red)
-              }
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Include ingredients")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          TagInputView(items: $includeIngredients, placeholder: "Add ingredients to include")
+        }
+
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Exclude ingredients")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          TagInputView(items: $excludeIngredients, placeholder: "Add ingredients to exclude")
+        }
+
+        VStack(alignment: .leading, spacing: 4) {
+          Text("Attributes")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+          TagInputView(
+            items: $attributes,
+            placeholder: "Add attribute…",
+            suggestions: Self.attributeSuggestions
+          )
+        }
+      }
+
+      Section("Results") {
+        if searchResults.isEmpty {
+          Text("No recipes match the current filters.")
+            .foregroundStyle(.secondary)
+        } else {
+          ForEach(searchResults, id: \.id) { recipe in
+            NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+              RecipeSearchResultItemView(recipe: recipe)
             }
           }
         }
       }
-      .navigationTitle("Search")
-      .navigationDestination(for: Recipe.self) { recipe in
-        RecipeDetailView(recipe: recipe)
-      }
+    }
+    .listStyle(.insetGrouped)
+    .refreshable {
+      await listViewModel.getRecipes()
     }
   }
 }

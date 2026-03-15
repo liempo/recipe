@@ -19,13 +19,11 @@ struct ContentView: View {
   enum Tab: String, CaseIterable {
     case browse
     case favorites
-    case search
 
     var title: String {
       switch self {
       case .browse: return "Browse"
       case .favorites: return "Favorites"
-      case .search: return "Search"
       }
     }
 
@@ -33,7 +31,6 @@ struct ContentView: View {
       switch self {
       case .browse: return "book.fill"
       case .favorites: return "heart.fill"
-      case .search: return "magnifyingglass"
       }
     }
   }
@@ -47,10 +44,6 @@ struct ContentView: View {
       FavoritesScreenView()
         .tabItem { Label(Tab.favorites.title, systemImage: Tab.favorites.systemImage) }
         .tag(Tab.favorites)
-
-      SearchScreenView()
-        .tabItem { Label(Tab.search.title, systemImage: Tab.search.systemImage) }
-        .tag(Tab.search)
     }
     .environmentObject(recipeListViewModel)
     .environmentObject(favoritesViewModel)

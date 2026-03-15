@@ -43,9 +43,6 @@ struct FavoritesScreenView: View {
         }
       }
       .navigationTitle("Favorites")
-      .navigationDestination(for: Recipe.self) { recipe in
-        RecipeDetailView(recipe: recipe)
-      }
     }
   }
 
@@ -55,7 +52,7 @@ struct FavoritesScreenView: View {
         if horizontalSizeClass == .regular {
           LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
             ForEach(favoriteRecipes, id: \.id) { recipe in
-              NavigationLink(value: recipe) {
+              NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                 RecipeCardView(recipe: recipe)
                   .contentShape(Rectangle())
               }
@@ -65,7 +62,7 @@ struct FavoritesScreenView: View {
         } else {
           VStack(spacing: 12) {
             ForEach(favoriteRecipes, id: \.id) { recipe in
-              NavigationLink(value: recipe) {
+              NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                 RecipeCardView(recipe: recipe)
                   .contentShape(Rectangle())
               }

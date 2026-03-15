@@ -31,8 +31,12 @@ struct BrowseScreenView: View {
         }
       }
       .navigationTitle("Browse")
-      .navigationDestination(for: Recipe.self) { recipe in
-        RecipeDetailView(recipe: recipe)
+      .toolbar {
+        ToolbarItem(placement: .topBarTrailing) {
+          NavigationLink(destination: SearchScreenView()) {
+            Image(systemName: "magnifyingglass")
+          }
+        }
       }
     }
   }
@@ -46,7 +50,7 @@ struct BrowseScreenView: View {
           if horizontalSizeClass == .regular {
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
               ForEach(browseRecipes, id: \.id) { recipe in
-                NavigationLink(value: recipe) {
+                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                   RecipeCardView(recipe: recipe)
                     .contentShape(Rectangle())
                 }
@@ -56,7 +60,7 @@ struct BrowseScreenView: View {
           } else {
             VStack(spacing: 12) {
               ForEach(browseRecipes, id: \.id) { recipe in
-                NavigationLink(value: recipe) {
+                NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
                   RecipeCardView(recipe: recipe)
                     .contentShape(Rectangle())
                 }
@@ -90,14 +94,14 @@ struct BrowseScreenView: View {
   private var tagFilterRow: some View {
     ScrollView(.horizontal, showsIndicators: false) {
       HStack(spacing: 8) {
-        FilterChip(
+        TagChip(
           title: "All",
           isSelected: selectedBrowseTag == nil
         ) {
           selectedBrowseTag = nil
         }
         ForEach(allTags, id: \.self) { tag in
-          FilterChip(
+          TagChip(
             title: tag,
             isSelected: selectedBrowseTag == tag
           ) {

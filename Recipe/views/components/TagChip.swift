@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct FilterChip: View {
+struct TagChip: View {
   let title: String
   let isSelected: Bool
   let action: () -> Void
@@ -28,9 +28,9 @@ struct FilterChip: View {
 
 #Preview {
   HStack(spacing: 12) {
-    FilterChip(title: "All", isSelected: true) {}
-    FilterChip(title: "vegan", isSelected: false) {}
-    FilterChip(title: "breakfast", isSelected: false) {}
+    TagChip(title: "All", isSelected: true) {}
+    TagChip(title: "vegan", isSelected: false) {}
+    TagChip(title: "breakfast", isSelected: false) {}
   }
   .padding()
 }
