@@ -9,55 +9,119 @@ import SwiftData
 import SwiftUI
 
 struct ContentView: View {
-  @Environment(\.modelContext) private var modelContext
-  @Query private var items: [Item]
+  @EnvironmentObject private var viewModel: RecipeViewModel
 
   var body: some View {
     NavigationSplitView {
-      List {
-        ForEach(items) { item in
-          NavigationLink {
-            Text(
-              "Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))"
-            )
-          } label: {
-            Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-          }
+      RecipeListView(recipes: viewModel.recipes, viewModel: viewModel)
+        .onAppear {
+          Task { await viewModel.loadRecipes() }
         }
-        .onDelete(perform: deleteItems)
-      }
-      .toolbar {
-        ToolbarItem(placement: .navigationBarTrailing) {
-          EditButton()
-        }
-        ToolbarItem {
-          Button(action: addItem) {
-            Label("Add Item", systemImage: "plus")
-          }
-        }
-      }
     } detail: {
-      Text("Select an item")
-    }
-  }
-
-  private func addItem() {
-    withAnimation {
-      let newItem = Item(timestamp: Date())
-      modelContext.insert(newItem)
-    }
-  }
-
-  private func deleteItems(offsets: IndexSet) {
-    withAnimation {
-      for index in offsets {
-        modelContext.delete(items[index])
-      }
+      Text("Select a recipe")
     }
   }
 }
 
+struct RecipeListView: View {
+  let recipes: Resource<[Recipe]>
+  let viewModel: RecipeViewModel
+
+  var body: some View {
+    Group {
+      switch recipes {
+      case .none, .loading:
+        ProgressView("Loading recipes…")
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      case .success(let list):
+        List {
+          ForEach(Array(list.enumerated()), id: \.offset) { _, recipe in
+            NavigationLink(value: recipe) {
+              VStack(alignment: .leading, spacing: 4) {
+                Text(recipe.title)
+                  .font(.headline)
+                if !recipe.description.isEmpty {
+                  Text(recipe.description)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                }
+              }
+            }
+          }
+        }
+      case .error(let error):
+        ContentUnavailableView(
+          "Error", systemImage: "exclamationmark.triangle",
+          description: Text(error.localizedDescription))
+      }
+    }
+    .navigationTitle("Recipes")
+    .toolbar {
+      ToolbarItem(placement: .primaryAction) {
+        Button("Refresh") {
+          Task { await viewModel.loadRecipes() }
+        }
+        .disabled(recipes.isLoading)
+      }
+    }
+    .navigationDestination(for: Recipe.self) { recipe in
+      RecipeDetailView(recipe: recipe)
+    }
+  }
+}
+
+extension Resource {
+  fileprivate var isLoading: Bool {
+    if case .loading = self { return true }
+    return false
+  }
+}
+
+private struct RecipeDetailView: View {
+  let recipe: Recipe
+
+  var body: some View {
+    ScrollView {
+      VStack(alignment: .leading, spacing: 16) {
+        Text(recipe.description)
+          .font(.body)
+        Text("Servings: \(recipe.servings)")
+          .font(.subheadline)
+        if !recipe.ingredients.isEmpty {
+          sectionTitle("Ingredients")
+          ForEach(recipe.ingredients, id: \.self) { Text("• \($0)") }
+        }
+        if !recipe.instructions.isEmpty {
+          sectionTitle("Instructions")
+          ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { index, step in
+            Text("\(index + 1). \(step)")
+          }
+        }
+        if !recipe.tags.isEmpty {
+          sectionTitle("Tags")
+          Text(recipe.tags.joined(separator: ", "))
+            .font(.subheadline)
+        }
+      }
+      .padding()
+      .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    .navigationTitle(recipe.title)
+  }
+
+  private func sectionTitle(_ title: String) -> some View {
+    Text(title)
+      .font(.headline)
+      .padding(.top, 8)
+  }
+}
+
 #Preview {
-  ContentView()
-    .modelContainer(for: Item.self, inMemory: true)
+  let schema = Schema([RecipeEntity.self])
+  let config = ModelConfiguration(isStoredInMemoryOnly: true)
+  let container = try! ModelContainer(for: schema, configurations: [config])
+  RecipeRepository.configure(container: container)
+  return ContentView()
+    .environmentObject(RecipeViewModel())
 }

@@ -10,24 +10,14 @@ import SwiftUI
 
 @main
 struct RecipeApp: App {
-  var sharedModelContainer: ModelContainer = {
-    let schema = Schema([
-      Item.self,
-      RecipeEntity.self
-    ])
-    let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-    do {
-      return try ModelContainer(for: schema, configurations: [modelConfiguration])
-    } catch {
-      fatalError("Could not create ModelContainer: \(error)")
-    }
-  }()
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+  @StateObject private var viewModel = RecipeViewModel()
 
   var body: some Scene {
     WindowGroup {
       ContentView()
+        .environmentObject(viewModel)
     }
-    .modelContainer(sharedModelContainer)
+    .modelContainer(appDelegate.modelContainer)
   }
 }

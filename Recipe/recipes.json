@@ -1,0 +1,18 @@
+[
+  {
+    "title": "Pasta Carbonara",
+    "description": "Classic Roman pasta with eggs, cheese, and guanciale.",
+    "servings": 4,
+    "ingredients": ["Spaghetti", "Guanciale", "Eggs", "Pecorino Romano", "Black pepper"],
+    "instructions": ["Boil pasta", "Fry guanciale", "Mix eggs and cheese", "Toss pasta with guanciale", "Add egg mixture off heat"],
+    "tags": ["vegetarian", "italian"]
+  },
+  {
+    "title": "Vegetable Stir Fry",
+    "description": "Quick stir-fried vegetables with soy sauce.",
+    "servings": 2,
+    "ingredients": ["Broccoli", "Bell peppers", "Soy sauce", "Garlic", "Ginger"],
+    "instructions": ["Heat wok", "Stir-fry garlic and ginger", "Add vegetables", "Add soy sauce"],
+    "tags": ["vegetarian", "vegan"]
+  }
+]

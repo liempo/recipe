@@ -2,6 +2,8 @@
 //  RecipeEntity.swift
 //  Recipe
 //
+//  Created by Alec  on 3/15/26.
+//
 
 import Foundation
 import SwiftData
@@ -10,54 +12,54 @@ import SwiftData
 @Model
 final class RecipeEntity {
   var title: String
-  var recipeDescription: String
-  var numberOfServings: Int
+  var recipeDescription: String // `description` is reserved in Model
+  var servings: Int
 
   // SwiftData doesn't persist [String] directly; store as JSON in Data.
   var ingredientsData: Data?
   var instructionsData: Data?
-  var dietaryAttributesData: Data?
+  var tagsData: Data?
 
   var ingredients: [String] {
     get { Self.decodeStringArray(from: ingredientsData) }
     set { ingredientsData = Self.encodeStringArray(newValue) }
   }
 
-  var cookingInstructions: [String] {
+  var instructions: [String] {
     get { Self.decodeStringArray(from: instructionsData) }
     set { instructionsData = Self.encodeStringArray(newValue) }
   }
 
-  var dietaryAttributes: [String] {
-    get { Self.decodeStringArray(from: dietaryAttributesData) }
-    set { dietaryAttributesData = Self.encodeStringArray(newValue) }
+  var tags: [String] {
+    get { Self.decodeStringArray(from: tagsData) }
+    set { tagsData = Self.encodeStringArray(newValue) }
   }
 
   init(
     title: String = "",
-    recipeDescription: String = "",
-    numberOfServings: Int = 1,
+    description: String = "",
+    servings: Int = 0,
     ingredients: [String] = [],
-    cookingInstructions: [String] = [],
-    dietaryAttributes: [String] = []
+    instructions: [String] = [],
+    tags: [String] = []
   ) {
     self.title = title
-    self.recipeDescription = recipeDescription
-    self.numberOfServings = numberOfServings
+    self.recipeDescription = description
+    self.servings = servings
     self.ingredientsData = Self.encodeStringArray(ingredients)
-    self.instructionsData = Self.encodeStringArray(cookingInstructions)
-    self.dietaryAttributesData = Self.encodeStringArray(dietaryAttributes)
+    self.instructionsData = Self.encodeStringArray(instructions)
+    self.tagsData = Self.encodeStringArray(tags)
   }
 
   /// Create from a Codable `Recipe` (e.g. from API or import).
   convenience init(from recipe: Recipe) {
     self.init(
       title: recipe.title,
-      recipeDescription: recipe.recipeDescription,
-      numberOfServings: recipe.numberOfServings,
+      description: recipe.description,
+      servings: recipe.servings,
       ingredients: recipe.ingredients,
-      cookingInstructions: recipe.cookingInstructions,
-      dietaryAttributes: recipe.dietaryAttributes
+      instructions: recipe.instructions,
+      tags: recipe.tags
     )
   }
 
@@ -65,11 +67,11 @@ final class RecipeEntity {
   func toRecipe() -> Recipe {
     Recipe(
       title: title,
-      recipeDescription: recipeDescription,
-      numberOfServings: numberOfServings,
+      description: recipeDescription,
+      servings: servings,
       ingredients: ingredients,
-      cookingInstructions: cookingInstructions,
-      dietaryAttributes: dietaryAttributes
+      instructions: instructions,
+      tags: tags
     )
   }
 
